@@ -9,6 +9,7 @@ import {
   setDoc,
   deleteDoc,
 } from "firebase/firestore";
+import { format } from "date-fns";
 
 import { ITask } from "./types/task.interface";
 import { db } from "./firebase";
@@ -17,6 +18,7 @@ import Header from "./components/Header";
 import Task from "./components/Task";
 import Tasks from "./components/Tasks";
 import AddTask from "./components/AddTask";
+import { Agenda, Calendar } from "react-native-calendars";
 
 export default function App() {
   const [showAddTask, setShowAddTask] = useState(false);
@@ -40,9 +42,12 @@ export default function App() {
           id: doc.data().id,
           text: doc.data().text,
           reminder: doc.data().reminder,
-          day: doc.data().day,
+          date: doc.data().date,
+          time: doc.data().time,
           details: doc.data().details,
           duration: doc.data().duration,
+          repeat: doc.data().repeat,
+          color: doc.data().color,
         },
       ];
     });
@@ -84,8 +89,31 @@ export default function App() {
     );
   };
 
+  const calendarItems = () => {
+    let items = {};
+    tasks.map((task) => {
+      const date = format(new Date(task.date), "yyyy-MM-dd");
+      const name = task.text;
+      items = { ...items, [date]: [{ name: name, day: date }] };
+    });
+
+    return items;
+  };
+
+  const tasksOnDay = (day: string) => {
+    let items: ITask[] = [];
+
+    tasks.map((task) => {
+      if (task.date === day) {
+        items.push(task);
+      }
+    });
+
+    return items;
+  };
+
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       <Header
         title="Task Tracker"
         onAdd={() => {
@@ -93,6 +121,29 @@ export default function App() {
         }}
         showAdd={showAddTask}
       />
+      <Agenda
+        onDayPress={(item) => {}}
+        minDate={new Date().toString()}
+        pastScrollRange={12}
+        items={calendarItems()}
+        renderItem={(item, firstItemInDay) => {
+          return (
+            <Tasks
+              tasks={tasksOnDay(item.day)}
+              onDelete={deleteTask}
+              onToggle={toggleReminder}
+            />
+          );
+        }}
+        renderEmptyData={() => {
+          return (
+            <View>
+              <Text>No tasks</Text>
+            </View>
+          );
+        }}
+        showOnlySelectedDayItems={true}
+      ></Agenda>
       <View>
         {showAddTask ? (
           <AddTask
@@ -104,12 +155,12 @@ export default function App() {
           false
         )}
       </View>
-      {tasks.length > 0 ? (
+      {/*tasks.length > 0 ? (
         <Tasks tasks={tasks} onDelete={deleteTask} onToggle={toggleReminder} />
       ) : (
         <Text>No texts to show</Text>
-      )}
-    </ScrollView>
+      )*/}
+    </View>
   );
 }
 

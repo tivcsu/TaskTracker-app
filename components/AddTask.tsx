@@ -14,6 +14,7 @@ import {
 
 import SliderWithFixValues from "./SliderWithFixValues";
 import SliderWithColorValues from "./SliderWithColorValues";
+import TimePicker from "./TimePicker";
 
 interface IAddTaskProps {
   onAdd: ({}) => void;
@@ -23,10 +24,11 @@ interface IAddTaskProps {
 
 const AddTask = ({ onAdd, onClose, visible }: IAddTaskProps) => {
   const [text, setText] = useState("");
-  const [day, setDay] = useState("");
+  //const [day, setDay] = useState("");
   const [details, setDetails] = useState("");
   const [reminder, setReminder] = useState(false);
-  const [date, setDate] = useState(new Date(1598051730000));
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
   const [duration, setDuration] = useState("1m");
   const [repeat, setRepeat] = useState("Once");
   const [color, setColor] = useState("green");
@@ -36,9 +38,10 @@ const AddTask = ({ onAdd, onClose, visible }: IAddTaskProps) => {
       alert("Please add a task");
       return;
     }
-    onAdd({ text, day, details, reminder, duration, repeat, color });
+    onAdd({ text, date, time, details, reminder, duration, repeat, color });
     setText("");
-    setDay("");
+    setDate("");
+    setTime("");
     setDetails("");
     setDuration("1m");
     setRepeat("Once");
@@ -46,9 +49,23 @@ const AddTask = ({ onAdd, onClose, visible }: IAddTaskProps) => {
     onClose();
   };
 
-  const onChange = (event: any, selectedDate: any) => {
-    const currentDate = selectedDate || date;
-    setDate(currentDate);
+  const onChange = (taskDate: string) => {
+    const dateStringToDate = new Date(taskDate);
+    const month =
+      dateStringToDate.getMonth() < 10
+        ? "0" + (+dateStringToDate.getMonth() + 1)
+        : +dateStringToDate.getMonth() + 1;
+    const dateOfTask =
+      dateStringToDate.getFullYear() +
+      "-" +
+      month +
+      "-" +
+      dateStringToDate.getDate();
+    setDate(dateOfTask);
+
+    const timeOfTask =
+      dateStringToDate.getHours() + ":" + dateStringToDate.getMinutes();
+    setTime(timeOfTask);
   };
 
   return (
@@ -83,21 +100,7 @@ const AddTask = ({ onAdd, onClose, visible }: IAddTaskProps) => {
               onChangeText={(text) => setText(text)}
             />
             <Text>Date & time</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Add Date and Time"
-              value={day}
-              onChangeText={(text) => setDay(text)}
-            />
-            <Text>Details</Text>
-            <TextInput
-              multiline
-              numberOfLines={4}
-              style={styles.multilineInput}
-              placeholder="Details"
-              value={details}
-              onChangeText={(text) => setDetails(text)}
-            />
+            <TimePicker onDateSet={onChange} />
             <SliderWithFixValues
               title="How long?"
               values={["1m", "10m", "30m", "1h"]}
@@ -118,7 +121,15 @@ const AddTask = ({ onAdd, onClose, visible }: IAddTaskProps) => {
               selectedValue={color}
               setSelected={setColor}
             />
-
+            <Text>Details</Text>
+            <TextInput
+              multiline
+              numberOfLines={4}
+              style={styles.multilineInput}
+              placeholder="Details"
+              value={details}
+              onChangeText={(text) => setDetails(text)}
+            />
             <View
               style={{
                 display: "flex",

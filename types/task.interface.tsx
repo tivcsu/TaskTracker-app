@@ -1,7 +1,8 @@
 export interface ITask {
   id: string;
   text: string;
-  day: string;
+  date: string;
+  time: string;
   reminder: boolean;
   details: string;
   duration: string;

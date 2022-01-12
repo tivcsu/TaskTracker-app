@@ -28,7 +28,9 @@ const Task = ({ task, onDelete, onToggle }: ITaskProps) => {
       >
         <View>
           <Text style={styles.taskName}>{task.text}</Text>
-          <Text>{task.day}</Text>
+          <Text>
+            {task.date} - {task.time}
+          </Text>
           <Text>{task.duration}</Text>
           <Text>{task.repeat}</Text>
           <View style={styles.taskDetails}>
